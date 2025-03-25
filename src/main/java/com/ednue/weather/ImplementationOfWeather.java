@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-class CityWeather extends WeatherData implements Runnable {
+class ImplementationOfWeather extends AbstractWeatherData implements Runnable {
 
     public void addCityWeather(String city, double temperature) {
         cityTemperatures.put(city, temperature);

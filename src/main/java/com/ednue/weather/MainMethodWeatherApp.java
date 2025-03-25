@@ -2,11 +2,11 @@ package com.ednue.weather;
 
 import java.util.Scanner;
 
-public class WeatherApp {
+public class MainMethodWeatherApp {
     public static void main(String[] args) {
-        CityWeather weatherTracker = new CityWeather();
+        ImplementationOfWeather weatherTracker = new ImplementationOfWeather();
         Thread autoUpdateThread = new Thread(weatherTracker);
-        autoUpdateThread.setDaemon(true); // Allows the program to exit if main thread ends
+        autoUpdateThread.setDaemon(true);
         autoUpdateThread.start();
 
         Scanner scanner = new Scanner(System.in);
