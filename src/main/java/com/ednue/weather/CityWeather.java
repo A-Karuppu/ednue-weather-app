@@ -1,17 +1,14 @@
 package com.ednue.weather;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
-class CityWeather extends WeatherData {
+class CityWeather extends WeatherData implements Runnable {
 
     public void addCityWeather(String city, double temperature) {
         cityTemperatures.put(city, temperature);
-        historicalData.add(city + " - " + temperature);
+        historicalData.add(city + " - " + temperature + "°C");
         uniqueCities.add(city);
     }
 
@@ -22,9 +19,18 @@ class CityWeather extends WeatherData {
         return cityTemperatures.get(city);
     }
 
-    public void sortCitiesByTemperature() {
+    public void viewWeatherHistory(String city) {
+        System.out.println("Weather history for " + city + ":");
+        for (String record : historicalData) {
+            if (record.startsWith(city)) {
+                System.out.println(record);
+            }
+        }
+    }
+
+    public void sortCitiesByTemperature(boolean ascending) {
         List<Map.Entry<String, Double>> sortedList = new ArrayList<>(cityTemperatures.entrySet());
-        sortedList.sort(Map.Entry.comparingByValue());
+        sortedList.sort(ascending ? Map.Entry.comparingByValue() : Map.Entry.comparingByValue(Comparator.reverseOrder()));
 
         System.out.println("Cities sorted by temperature:");
         for (Map.Entry<String, Double> entry : sortedList) {
@@ -43,5 +49,39 @@ class CityWeather extends WeatherData {
             System.out.println("Error saving weather data: " + e.getMessage());
         }
     }
-}
 
+    public void loadWeatherData() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("weather.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                historicalData.add(line);
+            }
+            System.out.println("Weather data loaded from weather.txt");
+        } catch (IOException e) {
+            System.out.println("Error loading weather data: " + e.getMessage());
+        }
+    }
+
+    public void autoUpdateWeather() {
+        for (String city : cityTemperatures.keySet()) {
+            double newTemperature = ThreadLocalRandom.current().nextDouble(-10.0, 40.0);
+            cityTemperatures.put(city, newTemperature);
+            historicalData.add(city + " - " + newTemperature + "°C (Auto-updated)");
+        }
+        System.out.println("Weather auto-updated for all cities.");
+        saveWeatherData();
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(1200000);
+                autoUpdateWeather();
+            } catch (InterruptedException e) {
+                System.out.println("Weather update thread interrupted.");
+                break;
+            }
+        }
+    }
+}
